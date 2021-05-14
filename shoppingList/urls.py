@@ -1,7 +1,9 @@
-from django.urls import path
-from .views import shopping_lists, shopping_list_detail
+from django.urls import path, include
+from .views import ShoppingListSet, ItemSet
+from rest_framework.routers import SimpleRouter
 
-urlpatterns = [
-    path('', shopping_lists),
-    path('<int:pk>/', shopping_list_detail),
-]
+router = SimpleRouter()
+router.register(r'shoppingList', ShoppingListSet, basename='shopping_list')
+router.register(r'item', ItemSet, basename='item')
+
+urlpatterns = router.urls
