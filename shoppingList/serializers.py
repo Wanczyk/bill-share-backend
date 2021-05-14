@@ -21,9 +21,9 @@ class ItemSerializer(serializers.ModelSerializer):
         item = Item.objects.create(
             item=request.data['item'],
             description=request.data['item'],
-            shoppingList=request.data['shoppingListID'],
+            shoppingList=ShoppingList.objects.get(pk=request.data['shoppingList']),
             price=request.data['price'],
-            boughtBy=request.user.id
+            boughtBy=request.user
         )
         item.save()
         return item
