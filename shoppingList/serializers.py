@@ -1,4 +1,7 @@
+from django.utils.datastructures import MultiValueDictKeyError
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+
 from .models import ShoppingList, Item
 from django.contrib.auth.models import User
 
@@ -28,6 +31,13 @@ class ItemSerializer(serializers.ModelSerializer):
         item.save()
         return item
 
+    def update(self, instance, validated_data):
+        instance.price = validated_data.get('price', instance.price)
+        instance.item = validated_data.get('item', instance.price)
+        instance.description = validated_data.get('description', instance.description)
+        instance.save()
+        return instance
+
 
 class ShoppingListSerializer(serializers.ModelSerializer):
     participants = UserSerializer(many=True, read_only=True)
@@ -46,6 +56,12 @@ class ShoppingListSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         request = self.context.get('request')
-        instance.participants.add(request.user)
-        instance.save()
-        return instance
+        if validated_data.get('name') == instance.name:
+            instance.participants.add(request.user)
+            try:
+                instance.name = request.data['newName']
+            except MultiValueDictKeyError:
+                pass
+            instance.save()
+            return instance
+        raise ValidationError("Shopping List not exists")
